@@ -16,6 +16,10 @@
   ],
   "author": "Ami Turgman",
   "license": "MIT",
+  "engines": {
+    "node": "7.6.0",
+    "npm": "4.1.2"
+  },
   "bugs": {
     "url": "https://github.com/CatalystCode/iBera/issues"
   },
