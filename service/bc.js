@@ -3,8 +3,36 @@ const Web3 = require('web3');
 const bcPromisified = require('./bcPromisified');
 
 const web3 = new Web3(new Web3.providers.HttpProvider());
-const promisified = bcPromisified(web3);
+const web3p = bcPromisified(web3);
 
+
+
+async function getTransaction(hash) {
+
+  console.log(`getTransaction: `, hash);
+  if (!hash) throw new Error(`'hash' value was not provided`);
+
+  try {
+    var tx = await web3p.eth.getTransaction(hash);
+    
+    if (tx.input) {
+      tx.inputAscii = web3.toAscii(tx.input);
+      try {
+        tx.inputObject = JSON.parse(tx.inputAscii);
+      }
+      catch(err) {
+        console.warn(`input is not a JSON object: ${tx.inputAscii}`);
+      }
+    }
+    
+    return tx;
+  }
+  catch(err) {
+    console.error(`error getting transaction '${hash}': ${err}`);
+    throw err;
+  }
+
+}
 
 
 async function sendTransaction(opts = {}) {
@@ -22,8 +50,8 @@ async function sendTransaction(opts = {}) {
   }
 
   let tx = {
-    from: opts.from,
-    to: opts.to,
+    from: opts.from.address,
+    to: opts.to.address,
     value: web3.toWei(opts.value, opts.units)
   };
 
@@ -32,13 +60,13 @@ async function sendTransaction(opts = {}) {
   }
   try {
 
-    // TODO: unlock accounts
-
     console.log(`sending transaction: ${JSON.stringify(tx, true, 2)}`);
-    var result = await promisified.sendTransaction(tx);
-
-    // TODO: lock accounts
     
+    //var unlockResult = await web3p.personal.unlockAccount(opts.from.address, opts.from.password);
+    //var result = await web3p.eth.sendTransaction(tx);
+
+    var result = await web3p.personal.sendTransaction(tx, opts.from.password);
+
     return result;
   }
   catch(err) {
@@ -47,6 +75,8 @@ async function sendTransaction(opts = {}) {
   }
 
 }
+
+
 
 /**
  * Gets balances for all accounts
@@ -57,10 +87,10 @@ async function getBalances() {
   console.log(`getBalances`);
   var balances = {};
   try {
-    var accounts = await promisified.getAccounts();
+    var accounts = await web3p.eth.getAccounts();
     for (var i=0; i<accounts.length; i++) {
       var id = accounts[i];
-      var balance = await promisified.getBalance(id);
+      var balance = await web3p.eth.getBalance(id);
       balances[id] = web3.fromWei(balance, "ether");
     }
     return balances;
@@ -72,6 +102,7 @@ async function getBalances() {
 }; 
 
 module.exports = {
-  sendTransaction,
-  getBalances
+  getBalances,
+  getTransaction,
+  sendTransaction
 }

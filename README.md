@@ -45,7 +45,7 @@
 * Exit the console using the `exit` command and start over with the mining flags:
 
 ```
-	geth --rpc --datadir ./data --ipcpath "/Users/<yourUserAccount>/Library/Ethereum/geth.ipc" --networkid 1234 --mine --minerthreads 1 --maxpeers 1 console
+	geth --rpc --datadir ./data --ipcpath "/Users/<yourUserAccount>/Library/Ethereum/geth.ipc" --networkid 1234 --mine --minerthreads 1 --maxpeers 1 --rpcapi=eth,web3,personal console
 ```
 
 ## Use Ethereum Wallet
